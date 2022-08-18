@@ -1,0 +1,58 @@
+server:
+  port: 8083
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        - TokenRelay
+      routes:
+        - id: music-service
+          uri: http://localhost:8081/
+          predicates:
+            - Path=/music/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedHeaders: "*"
+            allowedMethods:
+              - GET
+              - POST
+
+  security:
+    oauth2:
+      client:
+        provider:
+          my-keycloak-provider:
+            issuer-uri: http://localhost:8080/auth/realms/musicplayer
+        registration:
+          keycloak-spring-gateway-client:
+            provider: my-keycloak-provider
+            scope: openid
+            client-id: springboot-keycloak
+            client-secret: 3VxMIeXjvhPVnUjDQkgBOSn8Sjlm7VnX
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8080/auth/realms/musicplayer/protocol/openid-connect/certs
+
+
+#keycloak:
+ # realm: musicplayer
+  #auth-server-url: http://localhost:8080/auth
+  #resource: springboot-keycloak
+  #public-client: true
+  #bearer-only: true
+#keycloak.ssl-required =
+#keycloak.credentials.secret = f99EV29Dms5wgUxnCOYvDTxUTVNtc1j7
+#keycloak.use-resource-role-mappings = true
+
